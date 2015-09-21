@@ -78,6 +78,8 @@ class Bootstrap {
 	 */
 	protected function __construct($applicationContext) {
 		$this->requestId = substr(md5(uniqid('', TRUE)), 0, 13);
+		self::$composerClassLoader = require_once(__DIR__ . '/../../../../../../Configuration/Env.php');
+		$applicationContext = getenv('TYPO3_CONTEXT') ?: $applicationContext;
 		$this->applicationContext = new ApplicationContext($applicationContext);
 	}
 
@@ -87,6 +89,11 @@ class Bootstrap {
 	protected function __clone() {
 
 	}
+
+	/**
+	 * @var \Composer\Autoload\ClassLoader
+	 */
+	protected static $composerClassLoader;
 
 	/**
 	 * Return 'this' as singleton
@@ -161,6 +168,9 @@ class Bootstrap {
 	 * @return \Composer\Autoload\ClassLoader
 	 */
 	protected function initializeComposerClassLoader() {
+		if (!empty(self::$composerClassLoader)) {
+			return self::$composerClassLoader;
+		}
 		$respectComposerPackagesForClassLoading = getenv('TYPO3_COMPOSER_AUTOLOAD') ?: (getenv('REDIRECT_TYPO3_COMPOSER_AUTOLOAD') ?: NULL);
 		$possiblePaths = array();
 		if (!empty($respectComposerPackagesForClassLoading)) {
