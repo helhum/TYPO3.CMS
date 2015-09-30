@@ -463,6 +463,8 @@ class PackageManager extends \TYPO3\Flow\Package\PackageManager implements \TYPO
 			}
 
 			$this->registerPackage($package, FALSE);
+			// Change this to read the target from Composer or any other source
+			$this->packageStatesConfiguration['packages'][$packageKey]['classesPath'] = Package::DIRECTORY_CLASSES;
 
 			if (!$this->packages[$packageKey] instanceof \TYPO3\Flow\Package\PackageInterface) {
 				throw new \TYPO3\Flow\Package\Exception\CorruptPackageException(sprintf('The package class in package "%s" does not implement PackageInterface.', $packageKey), 1300782488);
