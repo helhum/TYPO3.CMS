@@ -317,7 +317,7 @@ abstract class RteHtmlAreaApi
             }
             $failure = GeneralUtility::writeFileToTypo3tempDir($destination, $minifiedJavaScript ? $minifiedJavaScript : $contents);
             if ($failure) {
-                throw new \RuntimeException($failure, 1294585668);
+                throw new \RuntimeException($failure, 1460975826);
             }
         }
         if ($this->isFrontend() || $this->isFrontendEditActive()) {

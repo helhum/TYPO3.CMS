@@ -67,7 +67,7 @@ class ArrayElementViewHelper extends AbstractViewHelper
         if (!is_scalar($result)) {
             throw new \TYPO3\CMS\Beuser\Exception(
                 'Only scalar return values (string, int, float or double) are supported.',
-                1382284105
+                1460976218
             );
         }
         return $result;

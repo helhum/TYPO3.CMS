@@ -105,7 +105,7 @@ class FileLockStrategy implements LockingStrategyInterface
         $this->isAcquired = flock($this->filePointer, $operation, $wouldBlock);
 
         if ($mode & self::LOCK_CAPABILITY_NOBLOCK && !$this->isAcquired && $wouldBlock) {
-            throw new LockAcquireWouldBlockException('Failed to acquire lock because the request would block.', 1428700748);
+            throw new LockAcquireWouldBlockException('Failed to acquire lock because the request would block.', 1460976417);
         }
 
         return $this->isAcquired;

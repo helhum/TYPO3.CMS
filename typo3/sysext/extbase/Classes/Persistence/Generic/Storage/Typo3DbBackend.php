@@ -654,7 +654,7 @@ class Typo3DbBackend implements BackendInterface, \TYPO3\CMS\Core\SingletonInter
     {
         // @todo profile this method again
         if (substr_count($sqlString, '?') !== count($parameters)) {
-            throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception('The number of question marks to replace must be equal to the number of parameters.', 1242816074);
+            throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception('The number of question marks to replace must be equal to the number of parameters.', 1460975513);
         }
         $offset = 0;
         foreach ($parameters as $parameter) {
@@ -730,7 +730,7 @@ class Typo3DbBackend implements BackendInterface, \TYPO3\CMS\Core\SingletonInter
         } elseif (!$ignoreEnableFields && !$includeDeleted) {
             $statement .= $this->getPageRepository()->enableFields($tableName);
         } elseif (!$ignoreEnableFields && $includeDeleted) {
-            throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InconsistentQuerySettingsException('Query setting "ignoreEnableFields=FALSE" can not be used together with "includeDeleted=TRUE" in frontend context.', 1327678173);
+            throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InconsistentQuerySettingsException('Query setting "ignoreEnableFields=FALSE" can not be used together with "includeDeleted=TRUE" in frontend context.', 1460975940);
         }
         return $statement;
     }

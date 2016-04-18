@@ -348,7 +348,7 @@ class PreparedStatement
                     $value = $parameterValue['value'] ? 1 : 0;
                     break;
                 default:
-                    throw new \InvalidArgumentException(sprintf('Unknown type %s used for parameter %s.', $parameterValue['type'], $key), 1281859196);
+                    throw new \InvalidArgumentException(sprintf('Unknown type %s used for parameter %s.', $parameterValue['type'], $key), 1460975749);
             }
 
             $combinedTypes .= $type;

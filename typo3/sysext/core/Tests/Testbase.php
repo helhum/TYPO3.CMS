@@ -251,7 +251,7 @@ class Testbase
             if (!is_dir($absoluteExtensionPath)) {
                 throw new Exception(
                     'Test extension path ' . $absoluteExtensionPath . ' not found',
-                    1376745645
+                    1460976105
                 );
             }
             $destinationPath = $instancePath . '/typo3conf/ext/' . basename($absoluteExtensionPath);
@@ -282,7 +282,7 @@ class Testbase
             if (!file_exists($sourcePath)) {
                 throw new Exception(
                     'Path ' . $sourcePath . ' not found',
-                    1376745645
+                    1460976106
                 );
             }
             $destinationPath = $instancePath . '/' . ltrim($destinationPathToLinkInTestInstance, '/');
@@ -505,7 +505,7 @@ class Testbase
             throw new Exception(
                 'TYPO3 Fatal Error: The current username, password or host was not accepted when the'
                 . ' connection to the database was attempted to be established!',
-                1377620117
+                1460976187
             );
         }
 
@@ -568,7 +568,7 @@ class Testbase
             throw new Exception(
                 'TYPO3 Fatal Error: The current username, password or host was not accepted when the'
                 . ' connection to the database was attempted to be established!',
-                1377620117
+                1460976188
             );
         }
         $database->setDatabaseName($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname']);
@@ -641,7 +641,7 @@ class Testbase
         if (!is_file($path)) {
             throw new Exception(
                 'Fixture file ' . $path . ' not found',
-                1376746261
+                1460976164
             );
         }
 
