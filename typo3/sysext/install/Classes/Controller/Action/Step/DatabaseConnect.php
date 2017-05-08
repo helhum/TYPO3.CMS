@@ -175,7 +175,7 @@ class DatabaseConnect extends AbstractStepAction {
 					require(ExtensionManagementUtility::extPath('dbal') . 'ext_localconf.php');
 					\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager')->setCacheConfigurations($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']);
 				}
-				if (!$this->isConnectSuccessful()) {
+				if (!$this->isConnectSuccessful(true)) {
 					/** @var $errorStatus \TYPO3\CMS\Install\Status\ErrorStatus */
 					$errorStatus = $this->objectManager->get('TYPO3\\CMS\\Install\\Status\\ErrorStatus');
 					$errorStatus->setTitle('Database connect not successful');
@@ -279,7 +279,7 @@ class DatabaseConnect extends AbstractStepAction {
 	 *
 	 * @return boolean TRUE if connect was successful
 	 */
-	protected function isConnectSuccessful() {
+	protected function isConnectSuccessful($failWithError = false) {
 		/** @var $databaseConnection \TYPO3\CMS\Core\Database\DatabaseConnection */
 		$databaseConnection = $this->objectManager->get('TYPO3\\CMS\\Core\\Database\\DatabaseConnection');
 
@@ -298,7 +298,9 @@ class DatabaseConnect extends AbstractStepAction {
 		$databaseConnection->setDatabaseSocket($this->getConfiguredSocket());
 
 		$databaseConnection->initialize();
-
+		if ($failWithError) {
+			return (bool)$databaseConnection->sql_pconnect();
+		}
 		return (bool)@$databaseConnection->sql_pconnect();
 	}
 
