@@ -68,20 +68,6 @@ class RequestHandler implements RequestHandlerInterface, PsrRequestHandlerInterf
         /** @var TypoScriptFrontendController $controller */
         $controller = $GLOBALS['TSFE'];
 
-        // Generate page
-        $controller->setUrlIdToken();
-        if ($controller->isGeneratePage()) {
-            $controller->generatePage_preProcessing();
-            $controller->preparePageContentGeneration();
-            $this->timeTracker->push('Page generation', '');
-            // Content generation
-            PageGenerator::renderContent();
-            $controller->setAbsRefPrefix();
-            $controller->generatePage_postProcessing();
-            $this->timeTracker->pull();
-        }
-        $controller->releaseLocks();
-
         // Render non-cached parts, which are taken from cache or added during page generation
         if ($controller->isINTincScript()) {
             $controller->preparePageContentGeneration();

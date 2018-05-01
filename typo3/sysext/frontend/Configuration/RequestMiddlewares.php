@@ -98,6 +98,15 @@ return [
         ],
         'typo3/cms-frontend/shortcut-and-mountpoint-redirect' => [
             'target' => \TYPO3\CMS\Frontend\Middleware\ShortcutAndMountPointRedirect::class,
+            'before' => [
+                'typo3/cms-frontend/typoscript-page-rendering',
+            ],
+            'after' => [
+                'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
+            ],
+        ],
+        'typo3/cms-frontend/typoscript-frontend-rendering' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\TypoScriptFrontendRendering::class,
             'after' => [
                 'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
             ]
