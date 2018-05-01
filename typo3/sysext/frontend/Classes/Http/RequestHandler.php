@@ -70,24 +70,21 @@ class RequestHandler implements RequestHandlerInterface, PsrRequestHandlerInterf
 
         // Generate page
         $controller->setUrlIdToken();
-        $this->timeTracker->push('Page generation', '');
         if ($controller->isGeneratePage()) {
             $controller->generatePage_preProcessing();
             $controller->preparePageContentGeneration();
+            $this->timeTracker->push('Page generation', '');
             // Content generation
-            if (!$controller->isINTincScript()) {
-                PageGenerator::renderContent();
-                $controller->setAbsRefPrefix();
-            }
+            PageGenerator::renderContent();
+            $controller->setAbsRefPrefix();
             $controller->generatePage_postProcessing();
-        } elseif ($controller->isINTincScript()) {
-            $controller->preparePageContentGeneration();
+            $this->timeTracker->pull();
         }
         $controller->releaseLocks();
-        $this->timeTracker->pull();
 
-        // Render non-cached parts
+        // Render non-cached parts, which are taken from cache or added during page generation
         if ($controller->isINTincScript()) {
+            $controller->preparePageContentGeneration();
             $this->timeTracker->push('Non-cached objects', '');
             $controller->INTincScript();
             $this->timeTracker->pull();

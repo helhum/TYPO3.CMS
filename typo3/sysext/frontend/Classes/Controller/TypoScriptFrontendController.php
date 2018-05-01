@@ -3297,6 +3297,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      */
     public function preparePageContentGeneration()
     {
+        $this->getTimeTracker()->push('Prepare content generation');
         if ($this->page['content_from_pid'] > 0) {
             // make REAL copy of TSFE object - not reference!
             $temp_copy_TSFE = clone $this;
@@ -3378,6 +3379,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
 
         // Global content object
         $this->newCObj();
+        $this->getTimeTracker()->pull();
     }
 
     /**
