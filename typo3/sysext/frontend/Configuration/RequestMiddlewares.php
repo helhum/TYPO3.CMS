@@ -96,5 +96,11 @@ return [
                 'typo3/cms-frontend/page-resolver',
             ]
         ],
+        'typo3/cms-frontend/shortcut-and-mountpoint-redirect' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\ShortcutAndMountPointRedirect::class,
+            'after' => [
+                'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
+            ]
+        ],
     ]
 ];
