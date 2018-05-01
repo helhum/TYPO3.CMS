@@ -68,14 +68,6 @@ class RequestHandler implements RequestHandlerInterface, PsrRequestHandlerInterf
         /** @var TypoScriptFrontendController $controller */
         $controller = $GLOBALS['TSFE'];
 
-        // Render non-cached parts, which are taken from cache or added during page generation
-        if ($controller->isINTincScript()) {
-            $controller->preparePageContentGeneration();
-            $this->timeTracker->push('Non-cached objects', '');
-            $controller->INTincScript();
-            $this->timeTracker->pull();
-        }
-
         // Create a Response object when sending content
         $response = new Response();
 

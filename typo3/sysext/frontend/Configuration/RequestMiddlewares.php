@@ -111,5 +111,11 @@ return [
                 'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
             ]
         ],
+        'typo3/cms-frontend/typoscript-frontend-uncached-rendering' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\TypoScriptFrontendUnCachedRendering::class,
+            'after' => [
+                'typo3/cms-frontend/typoscript-frontend-rendering',
+            ]
+        ],
     ]
 ];
