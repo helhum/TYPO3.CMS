@@ -748,8 +748,9 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * @internal Should only be used by TYPO3 core for now
      *
      * @var string
+     * @internal
      */
-    protected $contentType = 'text/html';
+    public $contentType = 'text/html';
 
     /**
      * Doctype to use
@@ -3710,9 +3711,11 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * This includes substituting the "username" comment, sending additional headers
      * (as defined in the TypoScript "config.additionalheaders" object), XHTML cleaning content (if configured)
      * Works on $this->content.
+     * @deprecated Deprecated in 9 will be removed with 10
      */
     public function processOutput()
     {
+        trigger_error('processOutput is deprecated. Use hooks to process content instead.', \E_USER_DEPRECATED);
         // Set header for charset-encoding unless disabled
         if (empty($this->config['config']['disableCharsetHeader'])) {
             $headLine = 'Content-Type: ' . $this->contentType . '; charset=' . trim($this->metaCharset);
@@ -3733,6 +3736,18 @@ class TypoScriptFrontendController implements LoggerAwareInterface
         if ($this->tempContent) {
             $this->addTempContentHttpHeaders();
         }
+        $this->processContent();
+    }
+
+    /**
+     * Process the output before it's actually outputted.
+     *
+     * This includes substituting the "username" comment
+     * Works on $this->content.
+     * @internal
+     */
+    public function processContent(): void
+    {
         // Make substitution of eg. username/uid in content only if cache-headers for client/proxy caching is NOT sent!
         if (!$this->isClientCachable) {
             $this->contentStrReplace();
@@ -3751,9 +3766,11 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * but in that case it is ok because the config-variables
      * are not yet available and so will not allow to send
      * cache headers)
+     * @deprecated Deprecated in 9 will be removed with 10
      */
     public function sendCacheHeaders()
     {
+        trigger_error('sendCacheHeaders is deprecated. Use middlewares to add additional headers.', \E_USER_DEPRECATED);
         // Getting status whether we can send cache control headers for proxy caching:
         $doCache = $this->isStaticCacheble();
         // This variable will be TRUE unless cache headers are configured to be sent ONLY if a branch does not allow logins and logins turns out to be allowed anyway...
@@ -3885,6 +3902,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
 
     /**
      * Sends HTTP headers for temporary content. These headers prevent search engines from caching temporary content and asks them to revisit this page again.
+     * @deprecated Deprecated since 9 will be removed with 10
      */
     public function addTempContentHttpHeaders()
     {
@@ -4712,6 +4730,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * Send additional headers from config.additionalHeaders
      *
      * @see \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::processOutput()
+     * @deprecated in 9 will be removed with 10
      */
     protected function sendAdditionalHeaders()
     {

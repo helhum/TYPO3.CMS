@@ -67,17 +67,16 @@ class RequestHandler implements RequestHandlerInterface, PsrRequestHandlerInterf
         $this->timeTracker = GeneralUtility::makeInstance(TimeTracker::class);
         /** @var TypoScriptFrontendController $controller */
         $controller = $GLOBALS['TSFE'];
-
-        // Create a Response object when sending content
         $response = new Response();
 
         // Output content
-        $isOutputting = $controller->isOutputting();
+        $isOutputting = $request->getAttribute('tsfeIsOutputting');
         if ($isOutputting) {
             $this->timeTracker->push('Print Content', '');
-            $controller->processOutput();
+            $controller->processContent();
             $this->timeTracker->pull();
         }
+
         // Store session data for fe_users
         $controller->storeSessionData();
 

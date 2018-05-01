@@ -19,19 +19,28 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Http\NullResponse;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * Send content-length header.
  * Notice that all HTML content outside the length of the content-length header will be cut off!
  * Therefore content of unknown length from included PHP-scripts and if admin users are logged
- * in (admin panel might show...) or if debug mode is turned on, we disable it!
+ * in (admin panel might show...), we disable it!
  *
  * @internal
  */
 class ContentLengthResponseHeader implements MiddlewareInterface
 {
+
+    /**
+     * @var TypoScriptFrontendController
+     */
+    protected $controller;
+
+    public function __construct(TypoScriptFrontendController $controller = null)
+    {
+        $this->controller = $controller ?: $GLOBALS['TSFE'] ?? null;
+    }
 
     /**
      * Adds the content length
@@ -42,19 +51,17 @@ class ContentLengthResponseHeader implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $isOutputting = $request->getAttribute('tsfeIsOutputting');
         $response = $handler->handle($request);
         if (
-            !($response instanceof NullResponse)
-            && $GLOBALS['TSFE'] instanceof TypoScriptFrontendController
-            && $GLOBALS['TSFE']->isOutputting()) {
-            if (
-                    (!isset($GLOBALS['TSFE']->config['config']['enableContentLengthHeader']) || $GLOBALS['TSFE']->config['config']['enableContentLengthHeader'])
-                    && !$GLOBALS['TSFE']->isBackendUserLoggedIn() && !$GLOBALS['TYPO3_CONF_VARS']['FE']['debug']
-                    && !$GLOBALS['TSFE']->config['config']['debug'] && !$GLOBALS['TSFE']->doWorkspacePreview()
-                ) {
-                $response = $response->withHeader('Content-Length', (string)$response->getBody()->getSize());
-            }
+            $isOutputting
+            && (!isset($this->controller->config['config']['enableContentLengthHeader']) || $this->controller->config['config']['enableContentLengthHeader'])
+            && !$this->controller->isBackendUserLoggedIn()
+            && !$this->controller->doWorkspacePreview()
+        ) {
+            $response = $response->withHeader('Content-Length', (string)$response->getBody()->getSize());
         }
+
         return $response;
     }
 }

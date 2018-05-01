@@ -8,7 +8,7 @@ return [
         'typo3/cms-redirects/redirecthandler' => [
             'target' => \TYPO3\CMS\Redirects\Http\Middleware\RedirectHandler::class,
             'before' => [
-                'typo3/cms-frontend/prepare-typoscript-rendering',
+                'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
             ]
         ],
     ],
