@@ -748,8 +748,9 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * @internal Should only be used by TYPO3 core for now
      *
      * @var string
+     * @internal
      */
-    protected $contentType = 'text/html';
+    public $contentType = 'text/html';
 
     /**
      * Doctype to use
@@ -2955,16 +2956,50 @@ class TypoScriptFrontendController implements LoggerAwareInterface
     }
 
     /**
+     * Returns URI of target page, if the current page is an overlaid mountpoint.
+     *
+     * If the current page is of type mountpoint and should be overlaid with the contents of the mountpoint page
+     * and is accessed directly, the user will be redirected to the mountpoint context.
+     * @internal
+     */
+    public function getRedirectUriForMountPoint(): ?string
+    {
+        if (!empty($this->originalMountPointPage) && (int)$this->originalMountPointPage['doktype'] === PageRepository::DOKTYPE_MOUNTPOINT) {
+            return $this->getUriToCurrentPageForRedirect();
+        }
+
+        return null;
+    }
+
+    /**
      * Redirect to target page if the current page is an overlaid mountpoint.
      *
      * If the current page is of type mountpoint and should be overlaid with the contents of the mountpoint page
      * and is accessed directly, the user will be redirected to the mountpoint context.
+     * @deprecated in TYPO3 9, will be removed in TYPO3 10
      */
     public function checkPageForMountpointRedirect()
     {
+        trigger_error('Method ' . __FUNCTION__ . 'is deprecated.', \E_USER_DEPRECATED);
         if (!empty($this->originalMountPointPage) && $this->originalMountPointPage['doktype'] == PageRepository::DOKTYPE_MOUNTPOINT) {
             $this->redirectToCurrentPage();
         }
+    }
+
+    /**
+     * Returns URI of target page, if the current page is a Shortcut.
+     *
+     * If the current page is of type shortcut and accessed directly via its URL,
+     * the user will be redirected to shortcut target.
+     * @internal
+     */
+    public function getRedirectUriForShortcut(): ?string
+    {
+        if (!empty($this->originalShortcutPage) && $this->originalShortcutPage['doktype'] == PageRepository::DOKTYPE_SHORTCUT) {
+            return $this->getUriToCurrentPageForRedirect();
+        }
+
+        return null;
     }
 
     /**
@@ -2972,19 +3007,36 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      *
      * If the current page is of type shortcut and accessed directly via its URL, this function redirects to the
      * Shortcut target using a Location header.
+     * @deprecated in TYPO3 9, will be removed in TYPO3 10
      */
     public function checkPageForShortcutRedirect()
     {
-        if (!empty($this->originalShortcutPage) && $this->originalShortcutPage['doktype'] == PageRepository::DOKTYPE_SHORTCUT) {
+        trigger_error('Method ' . __FUNCTION__ . 'is deprecated.', \E_USER_DEPRECATED);
+        if (!empty($this->originalShortcutPage) && (int)$this->originalShortcutPage['doktype'] === PageRepository::DOKTYPE_SHORTCUT) {
             $this->redirectToCurrentPage();
         }
     }
 
     /**
-     * Builds a typolink to the current page, appends the type paremeter if required
+     * Builds a typolink to the current page, appends the type parameter if required
      * and redirects the user to the generated URL using a Location header.
+     * @deprecated in TYPO3 9, will be removed in TYPO3 10
      */
     protected function redirectToCurrentPage()
+    {
+        trigger_error('Method ' . __FUNCTION__ . 'is deprecated.', \E_USER_DEPRECATED);
+        $redirectUrl = $this->getUriToCurrentPageForRedirect();
+        // Prevent redirection loop
+        if (!empty($redirectUrl) && GeneralUtility::getIndpEnv('REQUEST_URI') !== '/' . $redirectUrl) {
+            // redirect and exit
+            HttpUtility::redirect($redirectUrl, HttpUtility::HTTP_STATUS_307);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function getUriToCurrentPageForRedirect(): string
     {
         $this->calculateLinkVars();
         // Instantiate \TYPO3\CMS\Frontend\ContentObject to generate the correct target URL
@@ -2995,14 +3047,12 @@ class TypoScriptFrontendController implements LoggerAwareInterface
         if ($type && MathUtility::canBeInterpretedAsInteger($type)) {
             $parameter .= ',' . $type;
         }
-        $redirectUrl = $cObj->typoLink_URL(['parameter' => $parameter, 'addQueryString' => true,
-            'addQueryString.' => ['exclude' => 'id']]);
-
-        // Prevent redirection loop
-        if (!empty($redirectUrl) && GeneralUtility::getIndpEnv('REQUEST_URI') !== '/' . $redirectUrl) {
-            // redirect and exit
-            HttpUtility::redirect($redirectUrl, HttpUtility::HTTP_STATUS_307);
-        }
+        $redirectUrl = $cObj->typoLink_URL([
+            'parameter' => $parameter,
+            'addQueryString' => true,
+            'addQueryString.' => ['exclude' => 'id']
+        ]);
+        return $redirectUrl;
     }
 
     /********************************************
@@ -3248,6 +3298,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      */
     public function preparePageContentGeneration()
     {
+        $this->getTimeTracker()->push('Prepare content generation');
         if ($this->page['content_from_pid'] > 0) {
             // make REAL copy of TSFE object - not reference!
             $temp_copy_TSFE = clone $this;
@@ -3329,6 +3380,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
 
         // Global content object
         $this->newCObj();
+        $this->getTimeTracker()->pull();
     }
 
     /**
@@ -3659,9 +3711,11 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * This includes substituting the "username" comment, sending additional headers
      * (as defined in the TypoScript "config.additionalheaders" object), XHTML cleaning content (if configured)
      * Works on $this->content.
+     * @deprecated Deprecated in 9 will be removed with 10
      */
     public function processOutput()
     {
+        trigger_error('processOutput is deprecated. Use hooks to process content instead.', \E_USER_DEPRECATED);
         // Set header for charset-encoding unless disabled
         if (empty($this->config['config']['disableCharsetHeader'])) {
             $headLine = 'Content-Type: ' . $this->contentType . '; charset=' . trim($this->metaCharset);
@@ -3682,6 +3736,18 @@ class TypoScriptFrontendController implements LoggerAwareInterface
         if ($this->tempContent) {
             $this->addTempContentHttpHeaders();
         }
+        $this->processContent();
+    }
+
+    /**
+     * Process the output before it's actually outputted.
+     *
+     * This includes substituting the "username" comment
+     * Works on $this->content.
+     * @internal
+     */
+    public function processContent(): void
+    {
         // Make substitution of eg. username/uid in content only if cache-headers for client/proxy caching is NOT sent!
         if (!$this->isClientCachable) {
             $this->contentStrReplace();
@@ -3700,9 +3766,11 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * but in that case it is ok because the config-variables
      * are not yet available and so will not allow to send
      * cache headers)
+     * @deprecated Deprecated in 9 will be removed with 10
      */
     public function sendCacheHeaders()
     {
+        trigger_error('sendCacheHeaders is deprecated. Use middlewares to add additional headers.', \E_USER_DEPRECATED);
         // Getting status whether we can send cache control headers for proxy caching:
         $doCache = $this->isStaticCacheble();
         // This variable will be TRUE unless cache headers are configured to be sent ONLY if a branch does not allow logins and logins turns out to be allowed anyway...
@@ -3834,6 +3902,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
 
     /**
      * Sends HTTP headers for temporary content. These headers prevent search engines from caching temporary content and asks them to revisit this page again.
+     * @deprecated Deprecated since 9 will be removed with 10
      */
     public function addTempContentHttpHeaders()
     {
@@ -4661,6 +4730,7 @@ class TypoScriptFrontendController implements LoggerAwareInterface
      * Send additional headers from config.additionalHeaders
      *
      * @see \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::processOutput()
+     * @deprecated in 9 will be removed with 10
      */
     protected function sendAdditionalHeaders()
     {

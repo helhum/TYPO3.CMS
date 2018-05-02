@@ -67,70 +67,16 @@ class RequestHandler implements RequestHandlerInterface, PsrRequestHandlerInterf
         $this->timeTracker = GeneralUtility::makeInstance(TimeTracker::class);
         /** @var TypoScriptFrontendController $controller */
         $controller = $GLOBALS['TSFE'];
-
-        // Starts the template
-        $this->timeTracker->push('Start Template', '');
-        $controller->initTemplate();
-        $this->timeTracker->pull();
-        // Get from cache
-        $this->timeTracker->push('Get Page from cache', '');
-        $controller->getFromCache();
-        $this->timeTracker->pull();
-        // Get config if not already gotten
-        // After this, we should have a valid config-array ready
-        $controller->getConfigArray();
-        // Setting language and locale
-        $this->timeTracker->push('Setting language and locale', '');
-        $controller->settingLanguage();
-        $controller->settingLocale();
-        $this->timeTracker->pull();
-
-        // Convert POST data to utf-8 for internal processing if metaCharset is different
-        $controller->convPOSTCharset();
-
-        $controller->initializeRedirectUrlHandlers();
-
-        $controller->handleDataSubmission();
-
-        // Check for shortcut page and redirect
-        $controller->checkPageForShortcutRedirect();
-        $controller->checkPageForMountpointRedirect();
-
-        // Generate page
-        $controller->setUrlIdToken();
-        $this->timeTracker->push('Page generation', '');
-        if ($controller->isGeneratePage()) {
-            $controller->generatePage_preProcessing();
-            $controller->preparePageContentGeneration();
-            // Content generation
-            if (!$controller->isINTincScript()) {
-                PageGenerator::renderContent();
-                $controller->setAbsRefPrefix();
-            }
-            $controller->generatePage_postProcessing();
-        } elseif ($controller->isINTincScript()) {
-            $controller->preparePageContentGeneration();
-        }
-        $controller->releaseLocks();
-        $this->timeTracker->pull();
-
-        // Render non-cached parts
-        if ($controller->isINTincScript()) {
-            $this->timeTracker->push('Non-cached objects', '');
-            $controller->INTincScript();
-            $this->timeTracker->pull();
-        }
-
-        // Create a Response object when sending content
         $response = new Response();
 
         // Output content
-        $isOutputting = $controller->isOutputting();
+        $isOutputting = $request->getAttribute('tsfeIsOutputting');
         if ($isOutputting) {
             $this->timeTracker->push('Print Content', '');
-            $controller->processOutput();
+            $controller->processContent();
             $this->timeTracker->pull();
         }
+
         // Store session data for fe_users
         $controller->storeSessionData();
 

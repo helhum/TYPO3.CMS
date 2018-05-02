@@ -42,7 +42,8 @@ return [
         'typo3/cms-frontend/content-length-headers' => [
             'target' => \TYPO3\CMS\Frontend\Middleware\ContentLengthResponseHeader::class,
             'after' => [
-                'typo3/cms-frontend/maintenance-mode'
+                'typo3/cms-frontend/maintenance-mode',
+                'typo3/cms-frontend/typoscript-frontend-headers',
             ]
         ],
         'typo3/cms-frontend/tsfe' => [
@@ -53,9 +54,12 @@ return [
         ],
         'typo3/cms-frontend/output-compression' => [
             'target' => \TYPO3\CMS\Frontend\Middleware\OutputCompression::class,
+            'before' => [
+                'typo3/cms-frontend/authentication',
+            ],
             'after' => [
                 'typo3/cms-frontend/tsfe',
-            ]
+            ],
         ],
         'typo3/cms-frontend/authentication' => [
             'target' => \TYPO3\CMS\Frontend\Middleware\FrontendUserAuthenticator::class,
@@ -88,6 +92,39 @@ return [
                 'typo3/cms-frontend/authentication',
                 'typo3/cms-frontend/backend-user-authentication',
                 'typo3/cms-frontend/site',
+            ]
+        ],
+        'typo3/cms-frontend/prepare-typoscript-frontend-rendering' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\PrepareTypoScriptFrontendRendering::class,
+            'after' => [
+                'typo3/cms-frontend/page-resolver',
+            ]
+        ],
+        'typo3/cms-frontend/shortcut-and-mountpoint-redirect' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\ShortcutAndMountPointRedirect::class,
+            'before' => [
+                'typo3/cms-frontend/typoscript-frontend-rendering',
+            ],
+            'after' => [
+                'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
+            ],
+        ],
+        'typo3/cms-frontend/typoscript-frontend-rendering' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\TypoScriptFrontendRendering::class,
+            'after' => [
+                'typo3/cms-frontend/prepare-typoscript-frontend-rendering',
+            ]
+        ],
+        'typo3/cms-frontend/typoscript-frontend-uncached-rendering' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\TypoScriptFrontendUnCachedRendering::class,
+            'after' => [
+                'typo3/cms-frontend/typoscript-frontend-rendering',
+            ]
+        ],
+        'typo3/cms-frontend/typoscript-frontend-headers' => [
+            'target' => \TYPO3\CMS\Frontend\Middleware\TypoScriptFrontendHeaders::class,
+            'after' => [
+                'typo3/cms-frontend/typoscript-frontend-uncached-rendering',
             ]
         ],
     ]
